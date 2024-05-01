@@ -170,6 +170,6 @@ def modelo10():
     }
     '''
     data = request.json
-    file = joblib.load('pickle_files/model7.pkl')
-    res = file.predict([1, int(data['deparment']), int(data['holiday']), int(data['month'])])
+    file = joblib.load('pickle_files/model10.pkl')
+    res = file.predict([1, int(data['department']), int(data['holiday']), int(data['month'])])
     return json.dumps({'result': res[0]})
