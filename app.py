@@ -1,14 +1,18 @@
 from flask import Flask,request
+from flask_cors import CORS, cross_origin
 import joblib
 import json
 import numpy as np
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 #correr pip -r requirements.txt para instalar las dependencias necesarias
 #to run flask use: python -m flask run
     #agreguen manualmente los archivos de pickle ya que son pesados, en este caso se genero una carpeta llamada pickle_files donde se agrego model8.pkl.
 
 @app.route("/bitcoin", methods=['POST'])
+@cross_origin()
 def modelo1():
     '''
     {
