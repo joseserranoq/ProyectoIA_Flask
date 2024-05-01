@@ -1,12 +1,13 @@
-from flask import Flask,request
+
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
 import joblib
 import json
 import numpy as np
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
 
 
 # correr pip -r requirements.txt para instalar las dependencias necesarias
@@ -173,3 +174,60 @@ def modelo10():
     file = joblib.load('pickle_files/model10.pkl')
     res = file.predict([1, int(data['department']), int(data['holiday']), int(data['month'])])
     return json.dumps({'result': res[0]})
+
+
+@app.route('/emotion', methods=['POST'])
+def get_emotion():
+    """Detects faces in an image."""
+    from google.cloud import vision
+    import base64
+    path = request.json
+    client = vision.ImageAnnotatorClient()
+    img_data = path['image'].encode()
+    imageBase64 = base64.b64decode(img_data)
+
+    with open("imageToSave.png", "wb") as fh:
+        fh.write(imageBase64)
+
+    with open('imageToSave.png', 'rb') as image_file:
+        content = image_file.read()
+    image = vision.Image(content=content)
+
+    response = client.face_detection(image=image)
+    faces = response.face_annotations
+
+    # Names of likelihood from google.cloud.vision.enums
+    likelihood_name = (
+        "UNKNOWN",
+        "VERY_UNLIKELY",
+        "UNLIKELY",
+        "POSSIBLE",
+        "LIKELY",
+        "VERY_LIKELY",
+    )
+    print("Faces:")
+
+    for face in faces:
+        print(f"anger: {likelihood_name[face.anger_likelihood]}")
+        print(f"joy: {likelihood_name[face.joy_likelihood]}")
+        print(f"surprise: {likelihood_name[face.surprise_likelihood]}")
+
+        vertices = [
+            f"({vertex.x},{vertex.y})" for vertex in face.bounding_poly.vertices
+        ]
+
+        print("face bounds: {}".format(",".join(vertices)))
+
+    if response.error.message:
+        raise Exception(
+            "{}\nFor more info on error messages, check: "
+            "https://cloud.google.com/apis/design/errors".format(response.error.message)
+        )
+    return json.dumps({
+        'result': {
+            'anger': likelihood_name[faces[0].anger_likelihood],
+            'joy': likelihood_name[faces[0].joy_likelihood],
+            'surprise': likelihood_name[faces[0].surprise_likelihood],
+
+        }
+    })
