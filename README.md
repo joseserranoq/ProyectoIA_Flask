@@ -1,0 +1,1 @@
+Repositorio utilizado para realizar las llamadas a los archivos de pkl. Estas consultas son realizadas mediante flask. La interfaz se encuentra en el siguiente link: https://github.com/DiegoCarrillo32/ia-frontend
